@@ -75,7 +75,8 @@ class PurchaseParam {
   PurchaseParam(
       {@required this.productDetails,
       this.applicationUserName,
-      this.sandboxTesting});
+      this.sandboxTesting,
+      this.oldSku});
 
   /// The product to create payment for.
   ///
@@ -92,6 +93,10 @@ class PurchaseParam {
 
   /// The 'sandboxTesting' is only available on iOS, set it to `true` for testing in AppStore's sandbox environment. The default value is `false`.
   final bool sandboxTesting;
+
+  /// The 'oldSku' is an optional id of the SKU that the user is upgrading or downgrading from Google Play Store.
+  /// It's only used on Android.
+  final String oldSku;
 }
 
 /// Represents the transaction details of a purchase.

@@ -97,7 +97,8 @@ public class InAppPurchasePlugin implements MethodCallHandler {
         break;
       case MethodNames.LAUNCH_BILLING_FLOW:
         launchBillingFlow(
-            (String) call.argument("sku"), (String) call.argument("accountId"), result);
+            (String) call.argument("sku"), (String) call.argument("oldSku"),
+                (String) call.argument("accountId"), result);
         break;
       case MethodNames.QUERY_PURCHASES:
         queryPurchases((String) call.argument("skuType"), result);
@@ -188,7 +189,7 @@ public class InAppPurchasePlugin implements MethodCallHandler {
         });
   }
 
-  private void launchBillingFlow(String sku, @Nullable String accountId, Result result) {
+  private void launchBillingFlow(String sku, @Nullable String oldSku, @Nullable String accountId, Result result) {
     if (billingClientError(result)) {
       return;
     }
@@ -206,6 +207,9 @@ public class InAppPurchasePlugin implements MethodCallHandler {
         BillingFlowParams.newBuilder().setSkuDetails(skuDetails);
     if (accountId != null && !accountId.isEmpty()) {
       paramsBuilder.setAccountId(accountId);
+    }
+    if (oldSku != null) {
+      paramsBuilder.setOldSku(oldSku);
     }
     result.success(billingClient.launchBillingFlow(activity, paramsBuilder.build()));
   }

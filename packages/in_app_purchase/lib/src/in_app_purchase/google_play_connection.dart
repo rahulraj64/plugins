@@ -52,6 +52,7 @@ class GooglePlayConnection
   Future<bool> buyNonConsumable({@required PurchaseParam purchaseParam}) async {
     BillingResponse response = await billingClient.launchBillingFlow(
         sku: purchaseParam.productDetails.id,
+        oldSku: purchaseParam.oldSku,
         accountId: purchaseParam.applicationUserName);
     return response == BillingResponse.ok;
   }

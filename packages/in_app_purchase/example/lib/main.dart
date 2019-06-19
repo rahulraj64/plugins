@@ -15,10 +15,14 @@ void main() {
 const bool kAutoConsume = true;
 
 const String _kConsumableId = 'consumable';
+const String _kUpgrade = 'upgrade';
+const String _kMonthlySubscriptionId = 'subscription_monthly';
+const String _kYearlySubscriptionId = 'subscription_yearly';
 const List<String> _kProductIds = <String>[
   _kConsumableId,
-  'upgrade',
-  'subscription'
+  _kUpgrade,
+  _kMonthlySubscriptionId,
+  _kYearlySubscriptionId,
 ];
 
 class MyApp extends StatefulWidget {
@@ -248,10 +252,15 @@ class _MyAppState extends State<MyApp> {
                     color: Colors.green[800],
                     textColor: Colors.white,
                     onPressed: () {
+                      // 'oldSubscriptionSkuId' is only used to upgrade or downgrade subscriptions on Android.
+                      // This will be null for iOS as well as non subscription products on Android.
+                      String oldSubscriptionSkuId =
+                          _getOldSubscriptionSkuId(productDetails, purchases);
                       PurchaseParam purchaseParam = PurchaseParam(
                           productDetails: productDetails,
                           applicationUserName: null,
-                          sandboxTesting: true);
+                          sandboxTesting: true,
+                          oldSku: oldSubscriptionSkuId);
                       if (productDetails.id == _kConsumableId) {
                         _connection.buyConsumable(
                             purchaseParam: purchaseParam,
@@ -268,6 +277,25 @@ class _MyAppState extends State<MyApp> {
     return Card(
         child:
             Column(children: <Widget>[productHeader, Divider()] + productList));
+  }
+
+  String _getOldSubscriptionSkuId(
+      ProductDetails productDetails, Map<String, PurchaseDetails> purchases) {
+    // This is just to demonstrate a subscription upgrade or downgrade.
+    // If the current subscription is monthly, change it to yearly and vice versa.
+    String oldSubscriptionSkuId = null;
+    if (Platform.isAndroid) {
+      if (productDetails.id == _kMonthlySubscriptionId) {
+        if (purchases[_kYearlySubscriptionId] != null) {
+          oldSubscriptionSkuId = _kYearlySubscriptionId;
+        }
+      } else if (productDetails.id == _kYearlySubscriptionId) {
+        if (purchases[_kMonthlySubscriptionId] != null) {
+          oldSubscriptionSkuId = _kMonthlySubscriptionId;
+        }
+      }
+    }
+    return oldSubscriptionSkuId;
   }
 
   Card _buildConsumableBox() {
@@ -379,6 +407,12 @@ class _MyAppState extends State<MyApp> {
         } else if (Platform.isAndroid) {
           if (!kAutoConsume && purchaseDetails.productID == _kConsumableId) {
             InAppPurchaseConnection.instance.consumePurchase(purchaseDetails);
+          } else if (purchaseDetails.productID == _kMonthlySubscriptionId) {
+            _purchases.removeWhere(
+                (purchase) => purchase.productID == _kYearlySubscriptionId);
+          } else if (purchaseDetails.productID == _kYearlySubscriptionId) {
+            _purchases.removeWhere(
+                (purchase) => purchase.productID == _kMonthlySubscriptionId);
           }
         }
       }

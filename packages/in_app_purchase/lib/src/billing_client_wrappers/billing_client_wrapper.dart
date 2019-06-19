@@ -126,12 +126,16 @@ class BillingClient {
   /// Attempt to launch the Play Billing Flow for a given [skuDetails].
   ///
   /// The [skuDetails] needs to have already been fetched in a [querySkuDetails]
-  /// call. The [accountId] is an optional hashed string associated with the user
+  /// call.
+  ///
+  /// The [accountId] is an optional hashed string associated with the user
   /// that's unique to your app. It's used by Google to detect unusual behavior.
   /// Do not pass in a cleartext [accountId], use your developer ID, or use the
   /// user's Google ID for this field.
   ///
-  /// Calling this attemps to show the Google Play purchase UI. The user is free
+  /// The [oldSku] is an optional id of the SKU that the user is upgrading or downgrading from Google Play Store.
+  ///
+  /// Calling this attempts to show the Google Play purchase UI. The user is free
   /// to complete the transaction there.
   ///
   /// This method returns a [BillingResponse] representing the initial attempt
@@ -147,10 +151,11 @@ class BillingClient {
   /// and [the given
   /// accountId](https://developer.android.com/reference/com/android/billingclient/api/BillingFlowParams.Builder.html#setAccountId(java.lang.String)).
   Future<BillingResponse> launchBillingFlow(
-      {@required String sku, String accountId}) async {
+      {@required String sku, String oldSku, String accountId}) async {
     assert(sku != null);
     final Map<String, dynamic> arguments = <String, dynamic>{
       'sku': sku,
+      'oldSku' : oldSku,
       'accountId': accountId,
     };
     return BillingResponseConverter().fromJson(await channel.invokeMethod<int>(
