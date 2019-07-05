@@ -275,6 +275,63 @@ public class InAppPurchasePluginTest {
   }
 
   @Test
+  public void launchBillingFlow_ok_nullOldSku() {
+    // Fetch the sku details first and then prepare the launch billing flow call
+    String skuId = "foo";
+    queryForSkus(singletonList(skuId));
+    HashMap<String, Object> arguments = new HashMap<>();
+    arguments.put("sku", skuId);
+    arguments.put("oldSku", null);
+    MethodCall launchCall = new MethodCall(LAUNCH_BILLING_FLOW, arguments);
+
+    // Launch the billing flow
+    int responseCode = BillingResponse.OK;
+    when(mockBillingClient.launchBillingFlow(any(), any())).thenReturn(responseCode);
+    plugin.onMethodCall(launchCall, result);
+
+    // Verify we pass the arguments to the billing flow
+    ArgumentCaptor<BillingFlowParams> billingFlowParamsCaptor =
+            ArgumentCaptor.forClass(BillingFlowParams.class);
+    verify(mockBillingClient).launchBillingFlow(any(), billingFlowParamsCaptor.capture());
+    BillingFlowParams params = billingFlowParamsCaptor.getValue();
+    assertEquals(params.getSku(), skuId);
+    assertNull(params.getOldSku());
+
+    // Verify we pass the response code to result
+    verify(result, never()).error(any(), any(), any());
+    verify(result, times(1)).success(responseCode);
+  }
+
+  @Test
+  public void launchBillingFlow_ok_OldSku() {
+    // Fetch the sku details first and query the method call
+    String skuId = "foo";
+    String oldSku = "oldSku";
+    queryForSkus(singletonList(skuId));
+    HashMap<String, Object> arguments = new HashMap<>();
+    arguments.put("sku", skuId);
+    arguments.put("oldSku", oldSku);
+    MethodCall launchCall = new MethodCall(LAUNCH_BILLING_FLOW, arguments);
+
+    // Launch the billing flow
+    int responseCode = BillingResponse.OK;
+    when(mockBillingClient.launchBillingFlow(any(), any())).thenReturn(responseCode);
+    plugin.onMethodCall(launchCall, result);
+
+    // Verify we pass the arguments to the billing flow
+    ArgumentCaptor<BillingFlowParams> billingFlowParamsCaptor =
+            ArgumentCaptor.forClass(BillingFlowParams.class);
+    verify(mockBillingClient).launchBillingFlow(any(), billingFlowParamsCaptor.capture());
+    BillingFlowParams params = billingFlowParamsCaptor.getValue();
+    assertEquals(params.getSku(), skuId);
+    assertEquals(params.getOldSku(), oldSku);
+
+    // Verify we pass the response code to result
+    verify(result, never()).error(any(), any(), any());
+    verify(result, times(1)).success(responseCode);
+  }
+
+  @Test
   public void launchBillingFlow_clientDisconnected() {
     // Prepare the launch call after disconnecting the client
     MethodCall disconnectCall = new MethodCall(END_CONNECTION, null);
