@@ -12,9 +12,15 @@ import 'package:json_annotation/json_annotation.dart';
 import './in_app_purchase_connection.dart';
 import './product_details.dart';
 
+/// [IAPError.code] code for failed purchases.
 final String kPurchaseErrorCode = 'purchase_error';
+
+/// [IAPError.code] code used when a query for previouys transaction has failed.
 final String kRestoredPurchaseErrorCode = 'restore_transactions_failed';
+
+/// [IAPError.code] code used when a consuming a purchased item fails.
 final String kConsumptionFailedErrorCode = 'consume_purchase_failed';
+
 final String _kPlatformIOS = 'ios';
 final String _kPlatformAndroid = 'android';
 
@@ -53,12 +59,16 @@ class PurchaseVerificationData {
   /// Indicates the source of the purchase.
   final IAPSource source;
 
+  /// Creates a [PurchaseVerificationData] object with the provided information.
   PurchaseVerificationData(
       {@required this.localVerificationData,
       @required this.serverVerificationData,
       @required this.source});
 }
 
+/// Status for a [PurchaseDetails].
+///
+/// This is the type for [PurchaseDetails.status].
 enum PurchaseStatus {
   /// The purchase process is pending.
   ///
@@ -78,6 +88,7 @@ enum PurchaseStatus {
 
 /// The parameter object for generating a purchase.
 class PurchaseParam {
+  /// Creates a new purchase parameter object with the given data.
   PurchaseParam(
       {@required this.productDetails,
       this.applicationUserName,
@@ -200,6 +211,7 @@ class PurchaseDetails {
   // The value is either '_kPlatformIOS' or '_kPlatformAndroid'.
   String _platform;
 
+  /// Creates a new PurchaseDetails object with the provided data.
   PurchaseDetails({
     @required this.purchaseID,
     @required this.productID,
@@ -263,6 +275,7 @@ class PurchaseDetails {
 ///
 /// An instance of this class is returned in [InAppPurchaseConnection.queryPastPurchases].
 class QueryPurchaseDetailsResponse {
+  /// Creates a new [QueryPurchaseDetailsResponse] object with the provider information.
   QueryPurchaseDetailsResponse({@required this.pastPurchases, this.error});
 
   /// A list of successfully fetched past purchases.
