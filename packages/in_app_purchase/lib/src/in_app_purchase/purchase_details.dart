@@ -7,7 +7,6 @@ import 'package:in_app_purchase/src/billing_client_wrappers/enum_converters.dart
 import 'package:in_app_purchase/src/billing_client_wrappers/purchase_wrapper.dart';
 import 'package:in_app_purchase/src/store_kit_wrappers/enum_converters.dart';
 import 'package:in_app_purchase/src/store_kit_wrappers/sk_payment_transaction_wrappers.dart';
-import 'package:json_annotation/json_annotation.dart';
 
 import './in_app_purchase_connection.dart';
 import './product_details.dart';
@@ -112,7 +111,10 @@ class PurchaseParam {
   final bool sandboxTesting;
 
   /// The 'changeSubscriptionParam' is only available on Android, for upgrading or
-  /// downgrading an existing subscription.
+  /// downgrading an existing subscription. This does not require on iOS since
+  /// Apple provides a way to group related subscriptions together in iTunesConnect.
+  /// So when a subscription upgrade or downgrade is requested, Apple finds the old
+  /// subscription details from the group and handle it automatically.
   final ChangeSubscriptionParam changeSubscriptionParam;
 }
 
@@ -120,16 +122,19 @@ class PurchaseParam {
 /// the user can only purchase one subscription in a group at a time. This object
 /// is only applicable for Android.
 ///
-/// This object does not require on iOS since Apple provides a way to create a
-/// 'subscription group' in the iTunesConnect portal itself.
-@JsonSerializable()
-@ProrationModeConverter()
+/// This does not require on iOS since iTunesConnect provides a subscription grouping mechanism.
+/// Each subscription you offer must be assigned to a subscription group.
+/// So the developers can group related subscriptions together to prevent users from
+/// accidentally purchasing multiple subscriptions.
+///
+/// Please refer to the 'Creating a Subscription Group' sections of [Apple's subscription guide](https://developer.apple.com/app-store/subscriptions/)
 class ChangeSubscriptionParam {
+  /// Creates a new change subscription param object with given data
   ChangeSubscriptionParam(
       {@required this.oldPurchaseDetails, this.prorationMode});
 
-  /// The old product object of the existing subscription that the user needs to
-  /// change from.
+  /// The purchase object of the existing subscription that the user needs to
+  /// upgrade/downgrade from.
   final PurchaseDetails oldPurchaseDetails;
 
   /// The proration mode.

@@ -171,6 +171,13 @@ class BillingClient {
   /// skuDetails](https://developer.android.com/reference/com/android/billingclient/api/BillingFlowParams.Builder.html#setskudetails)
   /// and [the given
   /// accountId](https://developer.android.com/reference/com/android/billingclient/api/BillingFlowParams.Builder.html#setAccountId(java.lang.String)).
+  ///
+  /// When this method is called to purchase a subscription, an optional `oldSku`
+  /// can be passed in. This will tell Google Play that rather than purchasing a new subscription,
+  /// the user needs to upgrade/downgrade the existing subscription.
+  /// The [oldSku](https://developer.android.com/reference/com/android/billingclient/api/BillingFlowParams.Builder#setoldsku) is the SKU id that the user is upgrading or downgrading from.
+  /// The [prorationMode](https://developer.android.com/reference/com/android/billingclient/api/BillingFlowParams.Builder#setreplaceskusprorationmode) is the mode of proration during subscription upgrade/downgrade.
+  /// This value will only be effective if the `oldSku` is also set.
   Future<BillingResultWrapper> launchBillingFlow(
       {@required String sku,
       String accountId,
@@ -399,18 +406,28 @@ enum ProrationMode {
   // WARNING: Changes to this class need to be reflected in our generated code.
   // Run `flutter packages pub run build_runner watch` to rebuild and watch for
   // further changes.
+
+  /// Unknown upgrade or downgrade policy
   @JsonValue(0)
   unknownSubscriptionUpgradeDowngradePolicy,
 
+  /// Replacement takes effect immediately, and the remaining time will be prorated and credited to the user.
+  /// This is the current default behavior.
   @JsonValue(1)
   immediateWithTimeProration,
 
+  /// Replacement takes effect immediately, and the billing cycle remains the same.
+  /// The price for the remaining period will be charged.
+  /// This option is only available for subscription upgrade.
   @JsonValue(2)
   immediateAndChargeProratedPrice,
 
+  /// Replacement takes effect immediately, and the new price will be charged on next recurrence time.
+  /// The billing cycle stays the same.
   @JsonValue(3)
   immediateWithoutProration,
 
+  /// Replacement takes effect when the old plan expires, and the new price will be charged at the same time.
   @JsonValue(4)
   deferred,
 }

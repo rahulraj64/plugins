@@ -480,7 +480,11 @@ public class MethodCallHandlerTest {
     methodChannelHandler.onMethodCall(launchCall, result);
 
     // Assert that we sent an error back.
-    verify(result).error(contains("NOT_FOUND"), contains("oldSku is not available"), any());
+    verify(result)
+        .error(
+            contains("IN_APP_PURCHASE_REQUIRE_OLD_SKU"),
+            contains("launchBillingFlow failed because oldSku is null"),
+            any());
     verify(result, never()).success(any());
   }
 
@@ -518,6 +522,27 @@ public class MethodCallHandlerTest {
 
     // Assert that we sent an error back.
     verify(result).error(contains("NOT_FOUND"), contains(skuId), any());
+    verify(result, never()).success(any());
+  }
+
+  @Test
+  public void launchBillingFlow_oldSkuNotFound() {
+    // Try to launch the billing flow for a random sku ID
+    establishConnectedBillingClient(null, null);
+    String skuId = "foo";
+    String accountId = "account";
+    String oldSkuId = "oldSku";
+    queryForSkus(singletonList(skuId));
+    HashMap<String, Object> arguments = new HashMap<>();
+    arguments.put("sku", skuId);
+    arguments.put("accountId", accountId);
+    arguments.put("oldSku", oldSkuId);
+    MethodCall launchCall = new MethodCall(LAUNCH_BILLING_FLOW, arguments);
+
+    methodChannelHandler.onMethodCall(launchCall, result);
+
+    // Assert that we sent an error back.
+    verify(result).error(contains("IN_APP_PURCHASE_INVALID_OLD_SKU"), contains(oldSkuId), any());
     verify(result, never()).success(any());
   }
 

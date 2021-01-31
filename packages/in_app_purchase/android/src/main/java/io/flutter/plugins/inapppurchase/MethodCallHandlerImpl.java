@@ -40,6 +40,8 @@ class MethodCallHandlerImpl
     implements MethodChannel.MethodCallHandler, Application.ActivityLifecycleCallbacks {
 
   private static final String TAG = "InAppPurchasePlugin";
+  private static final String LOAD_SKU_DOC_URL =
+      "https://github.com/flutter/plugins/blob/master/packages/in_app_purchase/README.md#loading-products-for-sale";
 
   @Nullable private BillingClient billingClient;
   private final BillingClientFactory billingClientFactory;
@@ -209,31 +211,29 @@ class MethodCallHandlerImpl
     if (skuDetails == null) {
       result.error(
           "NOT_FOUND",
-          "Details for sku " + sku + " are not available. Has this ID already been fetched?",
+          String.format(
+              "Details for sku %s are not available. It might because skus were not fetched prior to the call. Please fetch the skus first. An example of how to fetch the skus could be found here: %s",
+              sku, LOAD_SKU_DOC_URL),
           null);
       return;
     }
 
-    if (oldSku != null) {
-      SkuDetails oldSkuDetails = cachedSkus.get(oldSku);
-      if (oldSkuDetails == null) {
-        result.error(
-            "NOT_FOUND",
-            "Details for old sku " + sku + " are not available. Has this ID already been fetched?",
-            null);
-        return;
-      }
-    }
-
     final int prorationMode = getProrationMode(prorationModeValue);
-    if (prorationMode != ProrationMode.UNKNOWN_SUBSCRIPTION_UPGRADE_DOWNGRADE_POLICY) {
-      if (oldSku == null) {
-        result.error(
-            "NOT_FOUND",
-            "oldSku is not available. You must provide the oldSku inorder to use a proration mode.",
-            null);
-        return;
-      }
+    if (oldSku == null
+        && prorationMode != ProrationMode.UNKNOWN_SUBSCRIPTION_UPGRADE_DOWNGRADE_POLICY) {
+      result.error(
+          "IN_APP_PURCHASE_REQUIRE_OLD_SKU",
+          "launchBillingFlow failed because oldSku is null. You must provide a valid oldSku in order to use a proration mode.",
+          null);
+      return;
+    } else if (oldSku != null && !cachedSkus.containsKey(oldSku)) {
+      result.error(
+          "IN_APP_PURCHASE_INVALID_OLD_SKU",
+          String.format(
+              "Details for sku %s are not available. It might because skus were not fetched prior to the call. Please fetch the skus first. An example of how to fetch the skus could be found here: %s",
+              oldSku, LOAD_SKU_DOC_URL),
+          null);
+      return;
     }
 
     if (activity == null) {

@@ -20,9 +20,12 @@ const bool _kAutoConsume = true;
 
 const String _kConsumableId = 'consumable';
 const List<String> _kProductIds = <String>[
-  _kConsumableId,
-  'upgrade',
-  'subscription'
+  //_kConsumableId,
+  //'upgrade',
+  //'subscription'
+  'sub_jul_2016_gold_monthly_100_per_day',
+  'sub_jul_2016_silver_monthly_50_per_day',
+  'sub_jul_2016_bronze_monthly_25_per_day'
 ];
 
 class _MyApp extends StatefulWidget {
@@ -255,14 +258,20 @@ class _MyAppState extends State<_MyApp> {
                       PurchaseParam purchaseParam = PurchaseParam(
                           productDetails: productDetails,
                           applicationUserName: null,
-                          sandboxTesting: true);
+                          sandboxTesting: true,
+                           changeSubscriptionParam: ChangeSubscriptionParam(
+                             oldPurchaseDetails: purchases['sub_jul_2016_silver_monthly_50_per_day'],
+                             prorationMode: ProrationMode.deferred
+                           )
+                      );
                       if (productDetails.id == _kConsumableId) {
                         _connection.buyConsumable(
                             purchaseParam: purchaseParam,
                             autoConsume: _kAutoConsume || Platform.isIOS);
                       } else {
                         _connection.buyNonConsumable(
-                            purchaseParam: purchaseParam);
+                            purchaseParam: purchaseParam,
+                        );
                       }
                     },
                   ));

@@ -45,6 +45,7 @@ class SkuTypeConverter implements JsonConverter<SkuType, String> {
 /// Use these in `@JsonSerializable()` classes by annotating them with
 /// `@ProrationModeConverter()`.
 class ProrationModeConverter implements JsonConverter<ProrationMode, int> {
+  /// Default const constructor.
   const ProrationModeConverter();
 
   @override

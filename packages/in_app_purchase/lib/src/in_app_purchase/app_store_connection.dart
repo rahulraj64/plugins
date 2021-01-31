@@ -56,6 +56,8 @@ class AppStoreConnection implements InAppPurchaseConnection {
 
   @override
   Future<bool> buyNonConsumable({@required PurchaseParam purchaseParam}) async {
+    assert(purchaseParam.changeSubscriptionParam == null,
+        'This does not require on iOS since iTunesConnect provides a subscription grouping mechanism.');
     await _skPaymentQueueWrapper.addPayment(SKPaymentWrapper(
         productIdentifier: purchaseParam.productDetails.id,
         quantity: 1,
